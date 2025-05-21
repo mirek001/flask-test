@@ -1,17 +1,21 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask Notes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-<nav>
-    <a href="{{ url_for('index') }}">Home</a> |
-    <a href="{{ url_for('notes') }}">Notes</a> |
-    <a href="{{ url_for('calc') }}">Calculator</a> |
-    <a href="{{ url_for('deliveries') }}">Deliveries</a> |
-    <a href="{{ url_for('calendar_view') }}">Delivery Calendar</a>
+<body class="container py-3">
+<nav class="mb-3">
+    <a class="me-2" href="{{ url_for('index') }}">Home</a>
+    <a class="me-2" href="{{ url_for('notes') }}">Notes</a>
+    <a class="me-2" href="{{ url_for('calc') }}">Calculator</a>
+    <a class="me-2" href="{{ url_for('deliveries') }}">Deliveries</a>
+    <a class="me-2" href="{{ url_for('calendar_view') }}">Delivery Calendar</a>
 </nav>
 <hr>
 {% block content %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
