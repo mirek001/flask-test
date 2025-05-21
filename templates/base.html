@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+    <title>Flask Notes</title>
+</head>
+<body>
+<nav>
+    <a href="{{ url_for('index') }}">Home</a> |
+    <a href="{{ url_for('notes') }}">Notes</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>
