@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
+import calendar
+import datetime
 import sqlite3
 from pathlib import Path
 
@@ -107,6 +109,31 @@ def deliveries():
     ).fetchall()
     conn.close()
     return render_template('deliveries.html', deliveries=deliveries)
+
+
+@app.route('/calendar')
+def calendar_view():
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
+    conn = get_db_connection()
+    deliveries = conn.execute(
+        "SELECT item, quantity, supplier, delivery_date FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
+        (f"{year:04d}-{month:02d}",),
+    ).fetchall()
+    conn.close()
+    deliveries_by_day = {}
+    for d in deliveries:
+        day = int(d['delivery_date'].split('-')[2])
+        deliveries_by_day.setdefault(day, []).append(d)
+    weeks = calendar.monthcalendar(year, month)
+    return render_template(
+        'calendar.html',
+        weeks=weeks,
+        deliveries_by_day=deliveries_by_day,
+        year=year,
+        month=month,
+    )
 
 if __name__ == '__main__':
     init_db()
