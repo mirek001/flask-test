@@ -43,7 +43,8 @@ function drop_handler(ev) {
         body: JSON.stringify({ id: id, new_date: date })
     }).then(resp => {
         if (resp.ok) {
-            ev.currentTarget.appendChild(document.querySelector('[data-id="' + id + '"]'));
+            // Reload the page so the calendar reflects the updated delivery date
+            window.location.reload();
         } else {
             alert('Move failed');
         }
