@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Deliveries</h1>
+<form method="post">
+    <label for="item">Item:</label><br>
+    <input type="text" id="item" name="item" required><br>
+    <label for="quantity">Quantity:</label><br>
+    <input type="text" id="quantity" name="quantity" required><br>
+    <label for="supplier">Supplier:</label><br>
+    <input type="text" id="supplier" name="supplier" required><br>
+    <label for="delivery_date">Delivery Date:</label><br>
+    <input type="date" id="delivery_date" name="delivery_date" required><br>
+    <button type="submit">Add Delivery</button>
+</form>
+<hr>
+{% for d in deliveries %}
+<h2>{{ d['item'] }}</h2>
+<strong>Quantity:</strong> {{ d['quantity'] }}<br>
+<strong>Supplier:</strong> {{ d['supplier'] }}<br>
+<strong>Date:</strong> {{ d['delivery_date'] }}
+<hr>
+{% endfor %}
+{% endblock %}

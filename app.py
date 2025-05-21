@@ -20,6 +20,17 @@ def init_db():
         )
         """
     )
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS deliveries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item TEXT NOT NULL,
+            quantity TEXT NOT NULL,
+            supplier TEXT NOT NULL,
+            delivery_date TEXT NOT NULL
+        )
+        """
+    )
     conn.commit()
     conn.close()
 
@@ -74,6 +85,28 @@ def notes():
     ).fetchall()
     conn.close()
     return render_template('notes.html', notes=notes)
+
+
+@app.route('/deliveries', methods=['GET', 'POST'])
+def deliveries():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        item = request.form['item']
+        quantity = request.form['quantity']
+        supplier = request.form['supplier']
+        delivery_date = request.form['delivery_date']
+        conn.execute(
+            'INSERT INTO deliveries (item, quantity, supplier, delivery_date) VALUES (?, ?, ?, ?)',
+            (item, quantity, supplier, delivery_date),
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('deliveries'))
+    deliveries = conn.execute(
+        'SELECT id, item, quantity, supplier, delivery_date FROM deliveries ORDER BY id DESC'
+    ).fetchall()
+    conn.close()
+    return render_template('deliveries.html', deliveries=deliveries)
 
 if __name__ == '__main__':
     init_db()
