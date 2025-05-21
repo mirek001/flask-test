@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Delivery Calendar - {{ year }}-{{ '%02d'|format(month) }}</h1>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+        <th>Sun</th>
+    </tr>
+    {% for week in weeks %}
+    <tr>
+        {% for day in week %}
+        <td valign="top" style="width:120px;height:80px;">
+            {% if day != 0 %}
+                <strong>{{ day }}</strong><br>
+                {% for d in deliveries_by_day.get(day, []) %}
+                    <div>{{ d['item'] }} ({{ d['quantity'] }})</div>
+                {% endfor %}
+            {% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
