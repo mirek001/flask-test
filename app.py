@@ -34,6 +34,27 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/calc', methods=['GET', 'POST'])
+def calc():
+    result = None
+    if request.method == 'POST':
+        try:
+            num1 = float(request.form['num1'])
+            num2 = float(request.form['num2'])
+            op = request.form['op']
+            if op == '+':
+                result = num1 + num2
+            elif op == '-':
+                result = num1 - num2
+            elif op == '*':
+                result = num1 * num2
+            elif op == '/':
+                result = 'Error: Division by zero' if num2 == 0 else num1 / num2
+        except Exception:
+            result = 'Error'
+    return render_template('calc.html', result=result)
+
+
 @app.route('/notes', methods=['GET', 'POST'])
 def notes():
     conn = get_db_connection()
