@@ -111,6 +111,16 @@ def deliveries():
     return render_template('deliveries.html', deliveries=deliveries)
 
 
+@app.route('/delete_delivery/<int:delivery_id>', methods=['POST'])
+def delete_delivery(delivery_id):
+    """Delete a delivery entry."""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM deliveries WHERE id = ?', (delivery_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('deliveries'))
+
+
 @app.route('/calendar')
 def calendar_view():
     today = datetime.date.today()

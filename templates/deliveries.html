@@ -18,6 +18,9 @@
 <strong>Quantity:</strong> {{ d['quantity'] }}<br>
 <strong>Supplier:</strong> {{ d['supplier'] }}<br>
 <strong>Date:</strong> {{ d['delivery_date'] }}
+<form method="post" action="{{ url_for('delete_delivery', delivery_id=d['id']) }}" class="mt-2">
+    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+</form>
 <hr>
 {% endfor %}
 {% endblock %}
