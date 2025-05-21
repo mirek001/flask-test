@@ -118,7 +118,7 @@ def calendar_view():
     month = today.month
     conn = get_db_connection()
     deliveries = conn.execute(
-        "SELECT item, quantity, supplier, delivery_date FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
+        "SELECT id, item, quantity, supplier, delivery_date FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
         (f"{year:04d}-{month:02d}",),
     ).fetchall()
     conn.close()
@@ -134,6 +134,21 @@ def calendar_view():
         year=year,
         month=month,
     )
+
+
+@app.route('/move_delivery', methods=['POST'])
+def move_delivery():
+    data = request.get_json()
+    delivery_id = int(data.get('id'))
+    new_date = data.get('new_date')
+    conn = get_db_connection()
+    conn.execute(
+        'UPDATE deliveries SET delivery_date = ? WHERE id = ?',
+        (new_date, delivery_id),
+    )
+    conn.commit()
+    conn.close()
+    return '', 204
 
 if __name__ == '__main__':
     init_db()

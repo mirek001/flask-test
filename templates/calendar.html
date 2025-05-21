@@ -14,11 +14,11 @@
     {% for week in weeks %}
     <tr>
         {% for day in week %}
-        <td valign="top" style="width:120px;height:80px;">
+        <td valign="top" style="width:120px;height:80px;" {% if day != 0 %}data-date="{{ year }}-{{ '%02d'|format(month) }}-{{ '%02d'|format(day) }}" ondragover="dragover_handler(event)" ondrop="drop_handler(event)"{% endif %}>
             {% if day != 0 %}
                 <strong>{{ day }}</strong><br>
                 {% for d in deliveries_by_day.get(day, []) %}
-                    <div>{{ d['item'] }} ({{ d['quantity'] }})</div>
+                    <div draggable="true" ondragstart="dragstart_handler(event)" data-id="{{ d['id'] }}">{{ d['item'] }} ({{ d['quantity'] }})</div>
                 {% endfor %}
             {% endif %}
         </td>
@@ -26,4 +26,28 @@
     </tr>
     {% endfor %}
 </table>
+<script>
+function dragstart_handler(ev) {
+    ev.dataTransfer.setData('text/plain', ev.target.dataset.id);
+}
+function dragover_handler(ev) {
+    ev.preventDefault();
+}
+function drop_handler(ev) {
+    ev.preventDefault();
+    const id = ev.dataTransfer.getData('text/plain');
+    const date = ev.currentTarget.dataset.date;
+    fetch('/move_delivery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, new_date: date })
+    }).then(resp => {
+        if (resp.ok) {
+            ev.currentTarget.appendChild(document.querySelector('[data-id="' + id + '"]'));
+        } else {
+            alert('Move failed');
+        }
+    });
+}
+</script>
 {% endblock %}
