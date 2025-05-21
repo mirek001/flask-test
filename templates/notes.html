@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Notes</h1>
+<form method="post">
+    <label for="title">Title:</label><br>
+    <input type="text" id="title" name="title" required><br>
+    <label for="category">Category:</label><br>
+    <input type="text" id="category" name="category" required><br>
+    <label for="content">Content:</label><br>
+    <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
+    <button type="submit">Add Note</button>
+</form>
+<hr>
+{% for note in notes %}
+<h2>{{ note['title'] }}</h2>
+<strong>Category:</strong> {{ note['category'] }}<br>
+<pre>{{ note['content'] }}</pre>
+<hr>
+{% endfor %}
+{% endblock %}
