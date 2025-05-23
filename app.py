@@ -1,12 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import calendar
 import datetime
 import sqlite3
 from pathlib import Path
+import requests
 
 app = Flask(__name__)
 
 DB_PATH = Path("notes.db")
+OLLAMA_API_URL = "http://127.0.0.1:11434/api/generate"
+# Use the local Mistral model for note generation
+OLLAMA_MODEL = "mistral"
 
 
 def init_db():
@@ -87,6 +91,25 @@ def notes():
     ).fetchall()
     conn.close()
     return render_template('notes.html', notes=notes)
+
+
+@app.route('/generate_note', methods=['POST'])
+def generate_note():
+    data = request.get_json()
+    prompt = data.get('prompt')
+    if not prompt:
+        return jsonify({'error': 'No prompt provided'}), 400
+    try:
+        resp = requests.post(
+            OLLAMA_API_URL,
+            json={'model': OLLAMA_MODEL, 'prompt': prompt, 'stream': False},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        text = resp.json().get('response', '')
+        return jsonify({'note': text})
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
 
 
 @app.route('/deliveries', methods=['GET', 'POST'])
