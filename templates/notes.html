@@ -8,7 +8,8 @@
     <input type="text" id="category" name="category" required><br>
     <label for="content">Content:</label><br>
     <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
-    <button type="submit">Add Note</button>
+    <button type="button" onclick="generateNote()" class="btn btn-secondary mb-2">Generate with Ollama</button>
+    <button type="submit" class="btn btn-primary">Add Note</button>
 </form>
 <hr>
 {% for note in notes %}
@@ -17,4 +18,25 @@
 <pre>{{ note['content'] }}</pre>
 <hr>
 {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function generateNote() {
+    const title = document.getElementById('title').value;
+    const category = document.getElementById('category').value;
+    const prompt = `Write a note titled "${title}" in the "${category}" category.`;
+    const response = await fetch('{{ url_for('generate_note') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+    });
+    if (response.ok) {
+        const data = await response.json();
+        document.getElementById('content').value = data.note;
+    } else {
+        alert('Error generating note');
+    }
+}
+</script>
 {% endblock %}
