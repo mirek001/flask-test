@@ -44,6 +44,16 @@ def init_db():
         )
         """
     )
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS warehouse (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            location TEXT NOT NULL
+        )
+        """
+    )
     # Ensure new columns exist if database was created with an older schema
     current = [row[1] for row in c.execute("PRAGMA table_info(deliveries)")]
     for col in ["delivery_time", "gate", "zone"]:
@@ -169,6 +179,37 @@ def delete_delivery(delivery_id):
     conn.commit()
     conn.close()
     return redirect(url_for('deliveries'))
+
+
+@app.route('/magazyn', methods=['GET', 'POST'])
+def magazyn():
+    conn = get_db_connection()
+    if request.method == 'POST':
+        name = request.form['name']
+        quantity = request.form['quantity']
+        location = request.form['location']
+        conn.execute(
+            'INSERT INTO warehouse (name, quantity, location) VALUES (?, ?, ?)',
+            (name, quantity, location),
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('magazyn'))
+    items = conn.execute(
+        'SELECT id, name, quantity, location FROM warehouse ORDER BY id DESC'
+    ).fetchall()
+    conn.close()
+    return render_template('warehouse.html', items=items)
+
+
+@app.route('/delete_item/<int:item_id>', methods=['POST'])
+def delete_item(item_id):
+    """Delete an item from the warehouse."""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM warehouse WHERE id = ?', (item_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('magazyn'))
 
 
 @app.route('/calendar')
