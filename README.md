@@ -6,7 +6,9 @@ example using SQLite. The home page still displays "Hello, World!" and a
 `notes.db` file. A "Deliveries" page lets you schedule deliveries with
 reservation of unloading gates and storage zones. Each delivery includes a
 specific date and time and triggers a notification logged to `notifications.log`.
-The "Delivery Calendar" page shows all deliveries on a monthly calendar.
+The "Delivery Calendar" page lets you view deliveries for **today**, the
+current week, month or year. When choosing "Today" the deliveries are displayed
+in a table, while other views show a calendar-style overview.
 
 ## Setup
 
