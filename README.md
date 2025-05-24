@@ -31,6 +31,8 @@ the greeting. The notes page is available at
 [http://127.0.0.1:5000/notes](http://127.0.0.1:5000/notes) and the deliveries
 page at
 [http://127.0.0.1:5000/deliveries](http://127.0.0.1:5000/deliveries). The
+warehouse page is at
+[http://127.0.0.1:5000/magazyn](http://127.0.0.1:5000/magazyn). The
 calendar is available at
 [http://127.0.0.1:5000/calendar](http://127.0.0.1:5000/calendar).
 
