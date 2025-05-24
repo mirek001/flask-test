@@ -3,9 +3,10 @@
 This repository contains a minimal Flask application with a small note taking
 example using SQLite. The home page still displays "Hello, World!" and a
 "Notes" page lets you create notes with categories which are stored in a local
-`notes.db` file. A new "Deliveries" page lets you track deliveries made to a
-construction site. The "Delivery Calendar" page shows deliveries on a monthly
-calendar.
+`notes.db` file. A "Deliveries" page lets you schedule deliveries with
+reservation of unloading gates and storage zones. Each delivery includes a
+specific date and time and triggers a notification logged to `notifications.log`.
+The "Delivery Calendar" page shows all deliveries on a monthly calendar.
 
 ## Setup
 

@@ -12,6 +12,10 @@ OLLAMA_API_URL = "http://127.0.0.1:11434/api/generate"
 # Use the local Mistral model for note generation
 OLLAMA_MODEL = "mistral"
 
+# Simple configuration for unloading gates and storage zones
+GATES = ["Gate 1", "Gate 2", "Gate 3"]
+ZONES = ["Zone A", "Zone B", "Zone C"]
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -33,10 +37,19 @@ def init_db():
             item TEXT NOT NULL,
             quantity TEXT NOT NULL,
             supplier TEXT NOT NULL,
-            delivery_date TEXT NOT NULL
+            delivery_date TEXT NOT NULL,
+            delivery_time TEXT DEFAULT '',
+            gate TEXT DEFAULT '',
+            zone TEXT DEFAULT ''
         )
         """
     )
+    # Ensure new columns exist if database was created with an older schema
+    current = [row[1] for row in c.execute("PRAGMA table_info(deliveries)")]
+    for col in ["delivery_time", "gate", "zone"]:
+        if col not in current:
+            c.execute(f"ALTER TABLE deliveries ADD COLUMN {col} TEXT DEFAULT ''")
+
     conn.commit()
     conn.close()
 
@@ -45,6 +58,14 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def send_notification(message: str) -> None:
+    """Write notification messages to a log file and stdout."""
+    log_path = Path("notifications.log")
+    with log_path.open("a", encoding="utf-8") as fh:
+        fh.write(message + "\n")
+    print(message)
 
 @app.route('/')
 def index():
@@ -120,18 +141,24 @@ def deliveries():
         quantity = request.form['quantity']
         supplier = request.form['supplier']
         delivery_date = request.form['delivery_date']
+        delivery_time = request.form['delivery_time']
+        gate = request.form['gate']
+        zone = request.form['zone']
         conn.execute(
-            'INSERT INTO deliveries (item, quantity, supplier, delivery_date) VALUES (?, ?, ?, ?)',
-            (item, quantity, supplier, delivery_date),
+            'INSERT INTO deliveries (item, quantity, supplier, delivery_date, delivery_time, gate, zone) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (item, quantity, supplier, delivery_date, delivery_time, gate, zone),
         )
         conn.commit()
+        send_notification(
+            f"Delivery scheduled: {item} x{quantity} from {supplier} on {delivery_date} {delivery_time} at {gate} / {zone}"
+        )
         conn.close()
         return redirect(url_for('deliveries'))
     deliveries = conn.execute(
-        'SELECT id, item, quantity, supplier, delivery_date FROM deliveries ORDER BY id DESC'
+        'SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries ORDER BY id DESC'
     ).fetchall()
     conn.close()
-    return render_template('deliveries.html', deliveries=deliveries)
+    return render_template('deliveries.html', deliveries=deliveries, gates=GATES, zones=ZONES)
 
 
 @app.route('/delete_delivery/<int:delivery_id>', methods=['POST'])
@@ -151,7 +178,7 @@ def calendar_view():
     month = today.month
     conn = get_db_connection()
     deliveries = conn.execute(
-        "SELECT id, item, quantity, supplier, delivery_date FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
+        "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
         (f"{year:04d}-{month:02d}",),
     ).fetchall()
     conn.close()
@@ -181,6 +208,7 @@ def move_delivery():
     )
     conn.commit()
     conn.close()
+    send_notification(f"Delivery {delivery_id} moved to {new_date}")
     return '', 204
 
 if __name__ == '__main__':
