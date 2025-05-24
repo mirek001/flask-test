@@ -18,7 +18,10 @@
             {% if day != 0 %}
                 <strong>{{ day }}</strong><br>
                 {% for d in deliveries_by_day.get(day, []) %}
-                    <div draggable="true" ondragstart="dragstart_handler(event)" data-id="{{ d['id'] }}">{{ d['item'] }} ({{ d['quantity'] }})</div>
+                    <div draggable="true" ondragstart="dragstart_handler(event)" data-id="{{ d['id'] }}">
+                        {{ d['delivery_time'] }} - {{ d['item'] }} ({{ d['quantity'] }})<br>
+                        <small>{{ d['gate'] }} / {{ d['zone'] }}</small>
+                    </div>
                 {% endfor %}
             {% endif %}
         </td>

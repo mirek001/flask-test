@@ -10,6 +10,20 @@
     <input type="text" id="supplier" name="supplier" required><br>
     <label for="delivery_date">Delivery Date:</label><br>
     <input type="date" id="delivery_date" name="delivery_date" required><br>
+    <label for="delivery_time">Delivery Time:</label><br>
+    <input type="time" id="delivery_time" name="delivery_time" required><br>
+    <label for="gate">Gate:</label><br>
+    <select id="gate" name="gate">
+        {% for g in gates %}
+        <option value="{{ g }}">{{ g }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="zone">Zone:</label><br>
+    <select id="zone" name="zone">
+        {% for z in zones %}
+        <option value="{{ z }}">{{ z }}</option>
+        {% endfor %}
+    </select><br>
     <button type="submit">Add Delivery</button>
 </form>
 <hr>
@@ -17,7 +31,9 @@
 <h2>{{ d['item'] }}</h2>
 <strong>Quantity:</strong> {{ d['quantity'] }}<br>
 <strong>Supplier:</strong> {{ d['supplier'] }}<br>
-<strong>Date:</strong> {{ d['delivery_date'] }}
+<strong>Date:</strong> {{ d['delivery_date'] }} {{ d['delivery_time'] }}<br>
+<strong>Gate:</strong> {{ d['gate'] }}<br>
+<strong>Zone:</strong> {{ d['zone'] }}
 <form method="post" action="{{ url_for('delete_delivery', delivery_id=d['id']) }}" class="mt-2">
     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
 </form>
