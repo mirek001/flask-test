@@ -176,6 +176,8 @@ def calendar_view():
     """Display deliveries for a selected period."""
     period = request.args.get("period", "month")
     today = datetime.date.today()
+    year_param = request.args.get("year")
+    month_param = request.args.get("month")
 
     conn = get_db_connection()
 
@@ -187,6 +189,17 @@ def calendar_view():
         conn.close()
         return render_template(
             "calendar.html", period=period, today=today, deliveries=deliveries
+        )
+
+    if period == "tomorrow":
+        tomorrow = today + datetime.timedelta(days=1)
+        deliveries = conn.execute(
+            "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE delivery_date = ?",
+            (tomorrow.isoformat(),),
+        ).fetchall()
+        conn.close()
+        return render_template(
+            "calendar.html", period=period, tomorrow=tomorrow, deliveries=deliveries
         )
 
     if period == "week":
@@ -229,8 +242,16 @@ def calendar_view():
         )
 
     # Default is month view
-    year = today.year
-    month = today.month
+    if year_param and month_param:
+        try:
+            year = int(year_param)
+            month = int(month_param)
+        except ValueError:
+            year = today.year
+            month = today.month
+    else:
+        year = today.year
+        month = today.month
     deliveries = conn.execute(
         "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
         (f"{year:04d}-{month:02d}",),
@@ -241,6 +262,16 @@ def calendar_view():
         day = int(d["delivery_date"].split("-")[2])
         deliveries_by_day.setdefault(day, []).append(d)
     weeks = calendar.monthcalendar(year, month)
+    prev_month = month - 1
+    prev_year = year
+    if prev_month == 0:
+        prev_month = 12
+        prev_year -= 1
+    next_month = month + 1
+    next_year = year
+    if next_month == 13:
+        next_month = 1
+        next_year += 1
     return render_template(
         "calendar.html",
         period="month",
@@ -248,6 +279,10 @@ def calendar_view():
         deliveries_by_day=deliveries_by_day,
         year=year,
         month=month,
+        prev_month=prev_month,
+        prev_year=prev_year,
+        next_month=next_month,
+        next_year=next_year,
     )
 
 

@@ -2,6 +2,7 @@
 {% block content %}
 <div class="mb-3">
     <a href="{{ url_for('calendar_view', period='today') }}">Today</a> |
+    <a href="{{ url_for('calendar_view', period='tomorrow') }}">Tomorrow</a> |
     <a href="{{ url_for('calendar_view', period='week') }}">This Week</a> |
     <a href="{{ url_for('calendar_view', period='month') }}">This Month</a> |
     <a href="{{ url_for('calendar_view', period='year') }}">This Year</a>
@@ -9,6 +10,33 @@
 
 {% if period == 'today' %}
 <h1>Deliveries Today - {{ today }}</h1>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Supplier</th>
+            <th>Time</th>
+            <th>Gate</th>
+            <th>Zone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in deliveries %}
+        <tr>
+            <td>{{ d['item'] }}</td>
+            <td>{{ d['quantity'] }}</td>
+            <td>{{ d['supplier'] }}</td>
+            <td>{{ d['delivery_time'] }}</td>
+            <td>{{ d['gate'] }}</td>
+            <td>{{ d['zone'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% elif period == 'tomorrow' %}
+<h1>Deliveries Tomorrow - {{ tomorrow }}</h1>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -71,7 +99,11 @@
 </table>
 
 {% else %}
-<h1>Delivery Calendar - {{ year }}-{{ '%02d'|format(month) }}</h1>
+<h1>
+    <a href="{{ url_for('calendar_view', period='month', year=prev_year, month=prev_month) }}">&larr;</a>
+    Delivery Calendar - {{ year }}-{{ '%02d'|format(month) }}
+    <a href="{{ url_for('calendar_view', period='month', year=next_year, month=next_month) }}">&rarr;</a>
+</h1>
 <table border="1" cellpadding="5" cellspacing="0">
     <tr>
         <th>Mon</th>
