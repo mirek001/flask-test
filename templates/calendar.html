@@ -1,5 +1,76 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="mb-3">
+    <a href="{{ url_for('calendar_view', period='today') }}">Today</a> |
+    <a href="{{ url_for('calendar_view', period='week') }}">This Week</a> |
+    <a href="{{ url_for('calendar_view', period='month') }}">This Month</a> |
+    <a href="{{ url_for('calendar_view', period='year') }}">This Year</a>
+</div>
+
+{% if period == 'today' %}
+<h1>Deliveries Today - {{ today }}</h1>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Supplier</th>
+            <th>Time</th>
+            <th>Gate</th>
+            <th>Zone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in deliveries %}
+        <tr>
+            <td>{{ d['item'] }}</td>
+            <td>{{ d['quantity'] }}</td>
+            <td>{{ d['supplier'] }}</td>
+            <td>{{ d['delivery_time'] }}</td>
+            <td>{{ d['gate'] }}</td>
+            <td>{{ d['zone'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% elif period == 'week' %}
+<h1>Deliveries This Week</h1>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        {% for d in days %}
+        <th>{{ d.strftime('%a %d') }}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for d in days %}
+        <td valign="top" style="width:120px;height:80px;">
+            {% set ds = d.isoformat() %}
+            {% for item in deliveries_by_day.get(ds, []) %}
+                {{ item['delivery_time'] }} - {{ item['item'] }} ({{ item['quantity'] }})<br>
+                <small>{{ item['gate'] }} / {{ item['zone'] }}</small><br>
+            {% endfor %}
+        </td>
+        {% endfor %}
+    </tr>
+</table>
+
+{% elif period == 'year' %}
+<h1>Deliveries This Year - {{ year }}</h1>
+<table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Month</th>
+        <th>Total Deliveries</th>
+    </tr>
+    {% for m in months %}
+    <tr>
+        <td>{{ m }}</td>
+        <td>{{ deliveries_by_month.get(m, 0) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% else %}
 <h1>Delivery Calendar - {{ year }}-{{ '%02d'|format(month) }}</h1>
 <table border="1" cellpadding="5" cellspacing="0">
     <tr>
@@ -29,6 +100,7 @@
     </tr>
     {% endfor %}
 </table>
+{% endif %}
 <script>
 function dragstart_handler(ev) {
     ev.dataTransfer.setData('text/plain', ev.target.dataset.id);

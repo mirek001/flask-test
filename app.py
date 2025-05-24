@@ -173,10 +173,64 @@ def delete_delivery(delivery_id):
 
 @app.route('/calendar')
 def calendar_view():
+    """Display deliveries for a selected period."""
+    period = request.args.get("period", "month")
     today = datetime.date.today()
+
+    conn = get_db_connection()
+
+    if period == "today":
+        deliveries = conn.execute(
+            "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE delivery_date = ?",
+            (today.isoformat(),),
+        ).fetchall()
+        conn.close()
+        return render_template(
+            "calendar.html", period=period, today=today, deliveries=deliveries
+        )
+
+    if period == "week":
+        start = today - datetime.timedelta(days=today.weekday())
+        end = start + datetime.timedelta(days=6)
+        deliveries = conn.execute(
+            "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE delivery_date BETWEEN ? AND ?",
+            (start.isoformat(), end.isoformat()),
+        ).fetchall()
+        conn.close()
+        deliveries_by_day = {}
+        for d in deliveries:
+            deliveries_by_day.setdefault(d["delivery_date"], []).append(d)
+        days = [start + datetime.timedelta(days=i) for i in range(7)]
+        return render_template(
+            "calendar.html",
+            period=period,
+            days=days,
+            deliveries_by_day=deliveries_by_day,
+        )
+
+    if period == "year":
+        year = today.year
+        deliveries = conn.execute(
+            "SELECT delivery_date FROM deliveries WHERE strftime('%Y', delivery_date) = ?",
+            (f"{year:04d}",),
+        ).fetchall()
+        conn.close()
+        deliveries_by_month = {}
+        for d in deliveries:
+            m = int(d["delivery_date"][5:7])
+            deliveries_by_month[m] = deliveries_by_month.get(m, 0) + 1
+        months = range(1, 13)
+        return render_template(
+            "calendar.html",
+            period=period,
+            year=year,
+            months=months,
+            deliveries_by_month=deliveries_by_month,
+        )
+
+    # Default is month view
     year = today.year
     month = today.month
-    conn = get_db_connection()
     deliveries = conn.execute(
         "SELECT id, item, quantity, supplier, delivery_date, delivery_time, gate, zone FROM deliveries WHERE strftime('%Y-%m', delivery_date) = ?",
         (f"{year:04d}-{month:02d}",),
@@ -184,11 +238,12 @@ def calendar_view():
     conn.close()
     deliveries_by_day = {}
     for d in deliveries:
-        day = int(d['delivery_date'].split('-')[2])
+        day = int(d["delivery_date"].split("-")[2])
         deliveries_by_day.setdefault(day, []).append(d)
     weeks = calendar.monthcalendar(year, month)
     return render_template(
-        'calendar.html',
+        "calendar.html",
+        period="month",
         weeks=weeks,
         deliveries_by_day=deliveries_by_day,
         year=year,
